@@ -54,7 +54,7 @@ module PagerBot::Parsing
 
     words.each do |word|
       case word
-      when 'for', 'on-call'
+      when 'for', /on(-|)call/, 'call'
         parse_stage = :schedule
       when 'on'
         if parse_stage == :schedule
@@ -100,7 +100,7 @@ module PagerBot::Parsing
       case word
       when 'is', 'am', 'are'
         parse_stage = :person
-      when 'on', 'for'
+      when 'on', 'for', /on(-|)call/, 'call'
         parse_stage = :schedule
       else
         person << word if parse_stage == :person
