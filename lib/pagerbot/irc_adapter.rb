@@ -43,6 +43,7 @@ module PagerBot::IrcAdapter
         c.nick = configatron.bot.name
         c.password = configatron.bot.irc.fetch(:bot_password, nil) 
         c.server = configatron.bot.irc.server
+        c.port = configatron.bot.irc.port
         c.ssl.use = configatron.bot.irc.fetch(:use_ssl, false)
         # add a hash at the beginning if needed
         c.channels = configatron.bot.channels.map do |ch|
