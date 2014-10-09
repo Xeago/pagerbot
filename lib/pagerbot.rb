@@ -37,6 +37,12 @@ module PagerBot
 
     log.info "msg=#{message.inspect}, extra_info=#{extra_info.inspect}"
     query = PagerBot::Parsing.parse(message, configatron.bot.name)
+
+    log.info query
+    query[:schedule]=$1 if
+      /[#&]([^\x07\x2C\s]{,200})/ =~ extra_info[:channel_name] &&
+      query[:schedule]==""
+
     log.info "query=#{query.inspect}"
     answer = action_manager.dispatch(query, extra_info)
     log.info "answer=#{answer.inspect}"
