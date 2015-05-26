@@ -39,9 +39,9 @@ module PagerBot
     log.info "msg=#{message.inspect}, extra_info=#{extra_info.inspect}"
     query = PagerBot::Parsing.parse(message, configatron.bot.name)
 
-    log.info query
+    log.info "query=#{query.inspect}"
     query[:schedule]=$1 if
-      /[#&]([^\x07\x2C\s]{,200})/ =~ extra_info[:channel_name] &&
+      /[#&]?([^\x07\x2C\s]{,200})/ =~ extra_info[:channel_name] &&
       query[:schedule]==""
 
     log.info "query=#{query.inspect}"

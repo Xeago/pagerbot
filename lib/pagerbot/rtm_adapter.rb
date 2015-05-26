@@ -8,6 +8,14 @@ module PagerBot::RtmAdapter
     def initialize(token, name)
       @token = token
       @name = name
+
+      data = {
+        token: configatron.bot.slack.api_token
+      }
+      resp = RestClient.post "https://slack.com/api/channels.list", data
+      channel_data = JSON.parse(resp)['channels']
+      @channels = Hash[[*channel_data.map {|c| [c['id'], c['name']]}]]
+      PagerBot.log.info "Know about #{@channels.count} slack channels."
     end
 
     def connect!
@@ -34,11 +42,19 @@ module PagerBot::RtmAdapter
       m['text']=~/@?#{@name}:/
     end 
 
+    def event_data(m)
+      {
+        nick: m['user'],
+        channel_name: @channels[m['channel']],
+        text: m['text'],
+        adapter: :rtm
+      }
+    end
+
     def process(m)
       return unless relevant? m
-      p({m: m})
-      answer = PagerBot.process(m['text'], {})
-      p({answer: answer})
+      data = event_data(m)
+      answer = PagerBot.process(m['text'], data)
       reply(m, answer)
     end
   end
