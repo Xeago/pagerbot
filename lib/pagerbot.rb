@@ -14,6 +14,7 @@ require_relative './pagerbot/action_manager'
 require_relative './pagerbot/slack_adapter'
 require_relative './pagerbot/hipchat_adapter'
 require_relative './pagerbot/irc_adapter'
+require_relative './pagerbot/rtm_adapter'
 require_relative './pagerbot/plugin/plugin_manager'
 
 module PagerBot
@@ -110,10 +111,13 @@ if __FILE__ == $0
     elsif ARGV.first.include?('hipchat') || configatron.bot.adapter == 'hipchat'
       PagerBot::HipchatAdapter.run!
     end
+  elsif ARGV.first.include? 'rtm'
+    PagerBot.reload_configuration!
+    PagerBot::RtmAdapter.run!
   elsif ARGV.first.include? 'irc'
     PagerBot.reload_configuration!
     PagerBot::IrcAdapter.run!
   else
-    raise "Could not find adapter #{ARGV.first}. It must be either 'irc', 'slack' or 'hipchat'"
+    raise "Could not find adapter #{ARGV.first}. It must be one of 'irc', 'slack', 'rtm' or 'hipchat'"
   end
 end
