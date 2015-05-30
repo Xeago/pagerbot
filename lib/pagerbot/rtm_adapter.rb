@@ -9,6 +9,21 @@ module PagerBot::RtmAdapter
       @token = token
       @name = name
 
+      whoami
+      slack_channels
+    end
+
+    def whoami
+      data = {
+        token: configatron.bot.slack.api_token
+      }
+      resp = RestClient.post "https://slack.com/api/auth.test", data
+      data = JSON.parse(resp)
+      raise ArgumentError.new("Bot name configured in slack #{data['user']} and bot #{@name} do not match!") if @name != data['user']
+      @user_id = data['user_id']
+    end
+
+    def slack_channels
       data = {
         token: configatron.bot.slack.api_token
       }
@@ -38,9 +53,12 @@ module PagerBot::RtmAdapter
     end
 
     def relevant?(m)
-      m['type'] == 'message' &&
-      m['text']=~/^@?#{@name}:/
-    end 
+      relevant = m['type'] == 'message' &&
+                    (m['text'].start_with?("#{@name}: ") || # without @name
+                     m['text'].start_with?("<@#{@user_id}>: ")) #with @name
+
+      return m['text'].gsub(/<@#{@user_id}>/, @name) if relevant
+    end
 
     def event_data(m)
       {
@@ -52,9 +70,10 @@ module PagerBot::RtmAdapter
     end
 
     def process(m)
-      return unless relevant? m
+      text = relevant? m
+      return unless text
       data = event_data(m)
-      answer = PagerBot.process(m['text'], data)
+      answer = PagerBot.process(text, data)
       reply(m, answer)
     end
   end
