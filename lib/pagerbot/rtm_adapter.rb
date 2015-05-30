@@ -39,7 +39,7 @@ module PagerBot::RtmAdapter
 
     def relevant?(m)
       m['type'] == 'message' &&
-      m['text']=~/@?#{@name}:/
+      m['text']=~/^@?#{@name}:/
     end 
 
     def event_data(m)
