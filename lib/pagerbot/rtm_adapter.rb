@@ -11,6 +11,7 @@ module PagerBot::RtmAdapter
 
       whoami
       slack_channels
+      slack_users
     end
 
     def whoami
@@ -31,6 +32,16 @@ module PagerBot::RtmAdapter
       channel_data = JSON.parse(resp)['channels']
       @channels = Hash[[*channel_data.map {|c| [c['id'], c['name']]}]]
       PagerBot.log.info "Know about #{@channels.count} slack channels."
+    end
+
+    def slack_users
+      data = {
+        token: configatron.bot.slack.api_token
+      }
+      resp = RestClient.post "https://slack.com/api/users.list", data
+      member_data = JSON.parse(resp)['members']
+      @users = Hash[[*member_data.map {|m| [m['id'], m['name']]}]]
+      PagerBot.log.info "Know about #{@users.count} slack users."
     end
 
     def connect!
@@ -62,8 +73,10 @@ module PagerBot::RtmAdapter
 
     def event_data(m)
       {
-        nick: m['user'],
+        nick: @users[m['user']],
+        slack_user: m['user'],
         channel_name: @channels[m['channel']],
+        slack_channel: m['channel'],
         text: m['text'],
         adapter: :rtm
       }
